@@ -433,21 +433,60 @@ jobs:
       - name: Comment on PR - No linked issue found
         if: steps.gather.outputs.issue_number == ''
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        env:
+          TACTICS_CONTENT: ${{ steps.ai-generate.outputs.tactics_content }}
+          PR_NUMBER: ${{ needs.authorize.outputs.pr_number }}
+          PR_BODY: ${{ steps.gather.outputs.pr_body }}
         with:
           github-token: ${{ github.token }}
           script: |
             const { owner, repo } = context.repo;
-            await github.rest.issues.createComment({
-              owner,
-              repo,
-              issue_number: Number(context.payload.issue.number),
-              body: '⚠️ Could not find a linked issue for this PR. Please specify the issue number explicitly using `/tactics <issue-number>`.',
-            });
+            const prNumber = Number(process.env.PR_NUMBER);
+            const tacticsContent = process.env.TACTICS_CONTENT || '';
+            const currentBody = process.env.PR_BODY || '';
+
+            if (tacticsContent) {
+              const beginMarker = '<!-- tactics-begin -->';
+              const endMarker = '<!-- tactics-end -->';
+              const tacticsBlock = `${beginMarker}\n## Tactics\n\n*Generated from PR #${prNumber} (no linked issue found)*\n\n${tacticsContent}\n${endMarker}`;
+
+              let newBody;
+              if (currentBody.includes(beginMarker)) {
+                const regex = new RegExp(`${beginMarker}[\\s\\S]*?${endMarker}`, 'g');
+                newBody = currentBody.replace(regex, tacticsBlock);
+              } else {
+                newBody = currentBody.trimEnd() + '\n\n' + tacticsBlock;
+              }
+
+              await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: prNumber,
+                body: newBody,
+              });
+
+              core.info(`Updated PR #${prNumber} description with tactics content.`);
+
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: Number(context.payload.issue.number),
+                body: `⚠️ No linked issue found for this PR. Tactics have been added to the PR description instead. To apply tactics to a specific issue, use \`/tactics <issue-number>\`. See [workflow details](${process.env.RUN_URL}).`,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner,
+                repo,
+                issue_number: Number(context.payload.issue.number),
+                body: '⚠️ Could not find a linked issue for this PR and no tactics were generated. Please specify the issue number explicitly using `/tactics <issue-number>`.',
+              });
+            }
+
             await github.rest.reactions.createForIssueComment({
               owner,
               repo,
               comment_id: Number(context.payload.comment.id),
-              content: 'confused',
+              content: '+1',
             });
 
   report-failure:
