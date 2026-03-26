@@ -10,7 +10,7 @@ permissions:
 env:
   REPO_NAME: ${{ github.event.repository.name }}
   RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-  AI_MODEL: gpt-4o-mini
+  AI_MODEL: gpt-4.1
 
 jobs:
   authorize:
@@ -259,11 +259,15 @@ jobs:
             const issueTitle = process.env.ISSUE_TITLE || '(none)';
             const issueBody = process.env.ISSUE_BODY || '(none)';
 
-            const prompt = [
-              'You are helping fill in a "tactics" template for a servicing pull request in the dotnet/sdk repository.',
-              '',
-              'A servicing PR targets a release branch and requires extra scrutiny. Fill in five sections based on the provided context.',
-              '',
+            const systemMessage = [
+              'You are an expert .NET SDK engineer helping fill in a "tactics" template for a servicing pull request.',
+              'A servicing PR targets a stable release branch (e.g. release/9.0.1xx) and undergoes extra scrutiny before merging.',
+              'Your job is to produce accurate, specific, and informative tactics based solely on the context provided.',
+              'Do not speculate or invent details that are not present in the context.',
+              'If information for a section is genuinely not available, say so clearly rather than writing a vague placeholder.',
+            ].join(n);
+
+            const userPrompt = [
               `## PR #${prNumber}: ${prTitle}`,
               `**Author:** @${prAuthor}`,
               `**Target branch:** ${prBaseRef}`,
@@ -287,14 +291,14 @@ jobs:
               '',
               '---',
               '',
-              'Based on all of the above, fill in the tactics template. Be concise but accurate.',
+              'Based on all of the above, fill in the tactics template. Be specific and detailed — avoid vague statements.',
               '',
               'Guidelines per section:',
-              '- **Summary**: 1-3 sentences describing what change is being made and why.',
-              '- **Customer Impact**: How does this affect customers? Include the type of failure (build error, runtime error, etc.), severity, and affected SDK version(s).',
-              '- **Regression?**: Was this introduced by a specific PR or SDK version? Answer "Yes, from #N" or "Yes, from vX.Y.Z" if known, otherwise "No" or "Unknown".',
-              '- **Testing**: What automated and/or manual testing was done? Check PR comments for evidence of private or manual validation.',
-              '- **Risk**: Rate as Low, Medium, or High with a one-sentence justification.',
+              '- **Summary**: 2-4 sentences. State the root cause of the bug or regression being fixed, describe the exact code change made to address it, and explain why this fix is appropriate for a servicing release.',
+              '- **Customer Impact**: Describe concretely how customers are affected: the symptom (e.g. build error, runtime crash, incorrect output), the exact SDK version(s) impacted, the frequency/severity (all users vs. specific scenario), and any known workarounds.',
+              '- **Regression?**: Was this introduced by a specific PR or SDK version? Answer "Yes, introduced in #N (description)" or "Yes, introduced in vX.Y.Z" if known. If not a regression or unclear, say "No" or "Unknown — not enough information to determine origin".',
+              '- **Testing**: List all forms of validation: unit tests added or modified, integration tests, manual repro steps from PR comments, private/lab testing, and CI results. If only CI ran, say so explicitly.',
+              '- **Risk**: Rate as Low, Medium, or High. Justify the rating by referencing the scope of the change (e.g. lines changed, components touched), test coverage, and any known edge cases or risks.',
               '',
               'Respond with ONLY the filled template in exactly this format. Do not include any preamble or text outside the sections:',
               '',
@@ -327,8 +331,11 @@ jobs:
               },
               body: JSON.stringify({
                 model: process.env.AI_MODEL,
-                messages: [{ role: 'user', content: prompt }],
-                max_tokens: 800, // Five short sections; 800 tokens is sufficient
+                messages: [
+                  { role: 'system', content: systemMessage },
+                  { role: 'user', content: userPrompt },
+                ],
+                max_tokens: 1500,
                 temperature: 0.2, // Low temperature for factual, consistent output
               }),
             });
