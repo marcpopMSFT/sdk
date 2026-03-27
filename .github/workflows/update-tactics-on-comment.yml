@@ -381,6 +381,7 @@ jobs:
               headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${copilotToken}`,
+                'Copilot-Integration-Id': 'vscode-chat',
               },
               body: JSON.stringify({
                 model: process.env.AI_MODEL,
