@@ -384,7 +384,10 @@ jobs:
               },
               body: JSON.stringify({
                 model: process.env.AI_MODEL,
-                messages: [{ role: 'user', content: prompt }],
+                messages: [
+                  { role: 'system', content: systemMessage },
+                  { role: 'user', content: userPrompt },
+                ],
                 max_tokens: 800,
                 temperature: 0.2,
               }),
