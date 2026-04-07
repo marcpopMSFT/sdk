@@ -12,7 +12,9 @@ safe-outputs:
   add-comment:
   add-labels:
   update-issue:
+    target: "*"
   update-pull-request:
+    target: "*"
   noop:
 
 on:
