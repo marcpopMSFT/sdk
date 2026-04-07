@@ -10,6 +10,7 @@ network:
 
 safe-outputs:
   add-comment:
+    max: 3
   add-labels:
   update-issue:
     target: "*"
@@ -103,10 +104,9 @@ Use the GitHub API to check the repository collaborator permission level for `${
 
 - If the actor does **not** have write or admin access, use the `add-comment` tool to post a comment on PR #`${{ github.event.issue.number }}` explaining that only collaborators with write access may trigger this workflow, then stop.
 
-#### Step 3: Acknowledge the request
+#### Step 3: React to the request
 
-1. Add an 👀 (eyes) reaction to the triggering comment (comment ID: `${{ github.event.comment.id }}`).
-2. Post a comment on PR #`${{ github.event.issue.number }}` saying: "▶️ Tactics update workflow started. Track progress in [this workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+Add an 👀 (eyes) reaction to the triggering comment (comment ID: `${{ github.event.comment.id }}`) to signal that the workflow has started.
 
 #### Step 4: Gather PR context
 
@@ -154,7 +154,7 @@ The output format must be exactly:
 [your text]
 ```
 
-#### Step 6: Apply tactics
+#### Step 6: Apply tactics and report status
 
 **If a linked issue was found:**
 
