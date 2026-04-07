@@ -45,7 +45,7 @@
 #   - actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
 #   - github/gh-aw-actions/setup@80471a493be8c528dd27daf73cd644242a7965e0 # v0.67.1
 
-name: "Update Tactics On Comment"
+name: "Add Tactics Template on Comment"
 "on":
   issue_comment:
     types:
@@ -78,7 +78,7 @@ permissions: {}
 concurrency:
   group: "gh-aw-${{ github.workflow }}-${{ github.event.issue.number || github.run_id }}"
 
-run-name: "Update Tactics On Comment"
+run-name: "Add Tactics Template on Comment"
 
 jobs:
   activation:
@@ -114,7 +114,7 @@ jobs:
           GH_AW_INFO_VERSION: "latest"
           GH_AW_INFO_AGENT_VERSION: "latest"
           GH_AW_INFO_CLI_VERSION: "v0.67.1"
-          GH_AW_INFO_WORKFLOW_NAME: "Update Tactics On Comment"
+          GH_AW_INFO_WORKFLOW_NAME: "Add Tactics Template on Comment"
           GH_AW_INFO_EXPERIMENTAL: "false"
           GH_AW_INFO_SUPPORTS_TOOLS_ALLOWLIST: "true"
           GH_AW_INFO_STAGED: "false"
@@ -994,7 +994,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_NOOP_MAX: "1"
-          GH_AW_WORKFLOW_NAME: "Update Tactics On Comment"
+          GH_AW_WORKFLOW_NAME: "Add Tactics Template on Comment"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_NOOP_REPORT_AS_ISSUE: "true"
@@ -1011,7 +1011,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_MISSING_TOOL_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "Update Tactics On Comment"
+          GH_AW_WORKFLOW_NAME: "Add Tactics Template on Comment"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1025,7 +1025,7 @@ jobs:
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
           GH_AW_REPORT_INCOMPLETE_CREATE_ISSUE: "true"
-          GH_AW_WORKFLOW_NAME: "Update Tactics On Comment"
+          GH_AW_WORKFLOW_NAME: "Add Tactics Template on Comment"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
@@ -1039,7 +1039,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ steps.setup-agent-output-env.outputs.GH_AW_AGENT_OUTPUT }}
-          GH_AW_WORKFLOW_NAME: "Update Tactics On Comment"
+          GH_AW_WORKFLOW_NAME: "Add Tactics Template on Comment"
           GH_AW_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           GH_AW_AGENT_CONCLUSION: ${{ needs.agent.result }}
           GH_AW_WORKFLOW_ID: "update-tactics-on-comment"
@@ -1139,7 +1139,7 @@ jobs:
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
-          WORKFLOW_NAME: "Update Tactics On Comment"
+          WORKFLOW_NAME: "Add Tactics Template on Comment"
           WORKFLOW_DESCRIPTION: "No description provided"
           HAS_PATCH: ${{ needs.agent.outputs.has_patch }}
         with:
@@ -1277,7 +1277,7 @@ jobs:
       GH_AW_ENGINE_ID: "copilot"
       GH_AW_ENGINE_MODEL: ${{ needs.agent.outputs.model }}
       GH_AW_WORKFLOW_ID: "update-tactics-on-comment"
-      GH_AW_WORKFLOW_NAME: "Update Tactics On Comment"
+      GH_AW_WORKFLOW_NAME: "Add Tactics Template on Comment"
     outputs:
       code_push_failure_count: ${{ steps.process_safe_outputs.outputs.code_push_failure_count }}
       code_push_failure_errors: ${{ steps.process_safe_outputs.outputs.code_push_failure_errors }}
