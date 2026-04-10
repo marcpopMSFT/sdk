@@ -9,8 +9,6 @@ network:
     - defaults
 
 safe-outputs:
-  add-comment:
-    max: 1
   add-labels:
     max: 1
     allowed: ["Servicing-consider"]
@@ -159,21 +157,14 @@ The output format must be exactly:
 
 2. Use the `add_labels` tool to add the `Servicing-consider` label to the issue.
 
-3. Use the `add_comment` tool to post a comment on the PR: "✅ Tactics have been added to issue #[issue number] and the `Servicing-consider` label has been applied. See [workflow details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
+3. Call the `noop` tool with a markdown summary: "✅ Tactics have been added to issue #[issue number] and the `Servicing-consider` label has been applied." Include the PR number, issue number, and a brief snippet of the generated tactics summary.
 
 **If no linked issue was found:**
 
 1. Use the `update_pull_request` tool to update the **PR description** instead, using the same `<!-- tactics-begin -->` / `<!-- tactics-end -->` markers, with a note that no linked issue was found.
 
-2. Use the `add_comment` tool to post a comment on the PR: "⚠️ No linked issue found for this PR. Tactics have been added to the PR description instead. To apply tactics to a specific issue, use `/tactics <issue-number>`. See [workflow details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})."
-
-#### Step 4: Report completion
-
-Call the `noop` tool with a well-formatted markdown summary of what was done, including the PR number, issue number (if applicable), and a brief snippet of the generated tactics.
+2. Call the `noop` tool with a markdown summary: "⚠️ No linked issue found for this PR. Tactics have been added to the PR description instead. To apply tactics to a specific issue, use `/tactics <issue-number>`." Include the PR number and a brief snippet of the generated tactics summary.
 
 ### Error Handling
 
-If any step fails unexpectedly:
-
-1. Use the `add_comment` tool to post a comment on PR #`${{ github.event.issue.number }}`: "❌ Failed to generate or apply tactics. Please check [the workflow run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details."
-2. Call the `noop` tool with the error details.
+If any step fails unexpectedly, call the `noop` tool with a markdown summary including "❌ Failed to generate or apply tactics" and the error details. The framework will post the failure status automatically.
