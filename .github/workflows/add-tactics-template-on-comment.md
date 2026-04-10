@@ -17,6 +17,7 @@ safe-outputs:
   update-issue:
     target: "*"
   update-pull-request:
+    target: "*"
   noop:
     report-as-issue: false
 
