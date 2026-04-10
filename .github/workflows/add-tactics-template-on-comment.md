@@ -9,11 +9,6 @@ network:
     - defaults
 
 safe-outputs:
-  add-labels:
-    max: 1
-    allowed: ["Servicing-consider"]
-  update-issue:
-    target: "*"
   update-pull-request:
     target: "*"
   noop:
@@ -141,29 +136,19 @@ The output format must be exactly:
 
 #### Step 3: Apply tactics and report status
 
-**If a linked issue was found:**
-
-1. Use the `update_issue` tool to update the issue body by adding (or replacing) a tactics section delimited by `<!-- tactics-begin -->` and `<!-- tactics-end -->` markers. The section should contain:
+1. Use the `update_pull_request` tool to update the **PR description** by adding (or replacing) a tactics section delimited by `<!-- tactics-begin -->` and `<!-- tactics-end -->` markers. The section should contain:
    ```
    <!-- tactics-begin -->
    ## Tactics
-
-   *Generated from PR #[PR number]*
 
    [generated tactics content]
    <!-- tactics-end -->
    ```
    If the markers already exist in the body, replace the content between them. Otherwise, append the block at the end.
 
-2. Use the `add_labels` tool to add the `Servicing-consider` label to the issue.
+2. If a linked issue was found and used as input, call the `noop` tool with a markdown summary: "✅ Tactics have been added to the PR description using context from issue #[issue number]." Include the PR number and a brief snippet of the generated tactics summary.
 
-3. Call the `noop` tool with a markdown summary: "✅ Tactics have been added to issue #[issue number] and the `Servicing-consider` label has been applied." Include the PR number, issue number, and a brief snippet of the generated tactics summary.
-
-**If no linked issue was found:**
-
-1. Use the `update_pull_request` tool to update the **PR description** instead, using the same `<!-- tactics-begin -->` / `<!-- tactics-end -->` markers, with a note that no linked issue was found.
-
-2. Call the `noop` tool with a markdown summary: "⚠️ No linked issue found for this PR. Tactics have been added to the PR description instead. To apply tactics to a specific issue, use `/tactics <issue-number>`." Include the PR number and a brief snippet of the generated tactics summary.
+3. If no linked issue was found, call the `noop` tool with a markdown summary: "✅ Tactics have been added to the PR description." Include the PR number and a brief snippet of the generated tactics summary.
 
 ### Error Handling
 
