@@ -15,7 +15,6 @@ safe-outputs:
     target: "${{ github.event.issue.number }}"
   noop:
     report-as-issue: false
-
 on:
   roles: all
   slash_command:
