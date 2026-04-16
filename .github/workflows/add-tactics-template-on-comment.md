@@ -4,20 +4,25 @@ permissions:
   issues: read
   pull-requests: read
 
-network:
-  allowed:
-    - defaults
+network: defaults
 
 safe-outputs:
   update-pull-request:
-    target: "*"
+    max: 1
+    body: true
+    title: false
+    footer: false
+    target: "triggering"
   noop:
     report-as-issue: false
-
+if: "!github.event.repository.fork"
 on:
+  roles: all
   slash_command:
     name: tactics
     events: [pull_request_comment]
+  reaction: "+1"
+  status-comment: false
 
 # ###############################################################
 # Override the COPILOT_GITHUB_TOKEN secret usage for the workflow
@@ -88,7 +93,7 @@ Follow these steps precisely:
 
 #### Step 1: Gather PR context
 
-The `/tactics` command may optionally include an issue number (e.g. `/tactics 12345`). Parse the sanitized trigger context above to extract any issue number provided after the command.
+The `/tactics` command may optionally include an issue number (e.g. `/tactics #12345` or `/tactics 12345`). Parse the sanitized trigger context above to extract any issue number provided after the command.
 
 For PR #`${{ github.event.issue.number }}`, gather the following information:
 
