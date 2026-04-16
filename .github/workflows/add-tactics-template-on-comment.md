@@ -12,7 +12,7 @@ safe-outputs:
     body: true
     title: false
     footer: false
-    target: "triggering"
+    target: "${{ github.event.issue.number }}"
   noop:
     report-as-issue: false
 
