@@ -16,7 +16,6 @@ safe-outputs:
   noop:
     report-as-issue: false
 
-if: "!github.event.repository.fork"
 on:
   roles: all
   slash_command:
