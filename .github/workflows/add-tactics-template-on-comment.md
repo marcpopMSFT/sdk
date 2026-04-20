@@ -15,8 +15,8 @@ safe-outputs:
     target: "${{ github.event.issue.number }}"
   noop:
     report-as-issue: false
+if: "github.event.repository.fork == false"
 on:
-  roles: all
   slash_command:
     name: tactics
     events: [pull_request_comment]
