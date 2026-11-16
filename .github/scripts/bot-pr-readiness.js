@@ -3,7 +3,10 @@
 
 const READY_LABEL = "ready-for-approval";
 const BUILD_ANALYSIS_CHECK_NAME = "Build Analysis";
-const BUILD_ANALYSIS_APP_ID = 216604;
+// FORK TEST ONLY: GitHub Actions app (fake-build-analysis.yml) instead of Build Analysis app 216604.
+const BUILD_ANALYSIS_APP_ID = 15368;
+// FORK TEST ONLY: PRs copied into the fork are opened by this user instead of the bot.
+const FORK_TEST_PR_AUTHOR = "marcpopMSFT";
 const PAGE_SIZE = 100;
 // GitHub's pull-request commits and compare APIs return at most 250 commits.
 const MAX_LISTED_COMMITS = 250;
@@ -42,7 +45,7 @@ const PR_TYPES = [
 function matchPrType(pr)
 {
     return PR_TYPES.find((type) =>
-        pr.user?.login === type.author &&
+        (pr.user?.login === type.author || pr.user?.login === FORK_TEST_PR_AUTHOR) &&
         type.headPattern.test(pr.head?.ref ?? "") &&
         type.titlePattern.test(pr.title ?? "")) ?? null;
 }

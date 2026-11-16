@@ -1,0 +1,43 @@
+# FORK TEST ONLY: simulates the Build Analysis check for bot-pr-readiness testing.
+name: Fake Build Analysis
+
+on:
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: Commit SHA (PR head) to attach the check run to
+        required: true
+        type: string
+      conclusion:
+        description: Check run conclusion
+        required: true
+        default: success
+        type: choice
+        options:
+          - success
+          - failure
+          - neutral
+
+permissions:
+  checks: write
+
+env:
+  DOTNET_CLI_TELEMETRY_SESSIONID: gha-${{ github.repository_id }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+jobs:
+  create-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Build Analysis check run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ inputs.sha }}
+          CONCLUSION: ${{ inputs.conclusion }}
+        run: |
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/check-runs" \
+            -f name="Build Analysis" \
+            -f head_sha="$SHA" \
+            -f status=completed \
+            -f conclusion="$CONCLUSION" \
+            -f "output[title]=Fake Build Analysis ($CONCLUSION)" \
+            -f "output[summary]=Created by fake-build-analysis.yml for bot-pr-readiness fork testing."
