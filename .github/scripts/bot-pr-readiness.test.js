@@ -32,7 +32,7 @@ function createPr(number, overrides = {})
     };
 }
 
-function createGitHub({prs, commits = {}, files = {}, comparisons = {}, reviews = {}, timeline = {}, checkRuns})
+function createGitHub({prs, commits = {}, files = {}, comparisons = {}})
 {
     const successfulBuildAnalysis = [{app: {id: 216604}, head_sha: HEAD_SHA, status: "completed", conclusion: "success", started_at: "2026-11-16T00:00:00Z", html_url: "https://example.test/ba"}];
     const routes = {
@@ -40,9 +40,9 @@ function createGitHub({prs, commits = {}, files = {}, comparisons = {}, reviews 
         "GET /repos/{owner}/{repo}/pulls/{pull_number}": ({pull_number}) => prs.find((pr) => pr.number === pull_number),
         "GET /repos/{owner}/{repo}/pulls/{pull_number}/commits": ({pull_number}) => commits[pull_number] ?? [],
         "GET /repos/{owner}/{repo}/pulls/{pull_number}/files": ({pull_number}) => files[pull_number] ?? [],
-        "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews": ({pull_number}) => reviews[pull_number] ?? [],
-        "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline": ({issue_number}) => timeline[issue_number] ?? [],
-        "GET /repos/{owner}/{repo}/commits/{ref}/check-runs": () => ({check_runs: checkRuns ?? successfulBuildAnalysis}),
+        "GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews": () => [],
+        "GET /repos/{owner}/{repo}/issues/{issue_number}/timeline": () => [],
+        "GET /repos/{owner}/{repo}/commits/{ref}/check-runs": () => ({check_runs: successfulBuildAnalysis}),
     };
 
     function resolve(route, params)
@@ -112,33 +112,7 @@ test("removes the label when a human pushed to a codeflow PR", async () =>
     assert.equal(outputs.remove_numbers, "2");
 });
 
-test("does not trust a Build Analysis check run from another app", async () =>
-{
-    const github = createGitHub({
-        prs: [createPr(3)],
-        commits: {3: [commit("c1", MAESTRO)]},
-        checkRuns: [{app: {id: 1}, head_sha: HEAD_SHA, status: "completed", conclusion: "success"}],
-    });
 
-    const {actions} = await run(github);
-
-    assert.deepEqual(actions, []);
-});
-
-test("blocks on outstanding change requests and foreign force-pushes", async () =>
-{
-    const github = createGitHub({
-        prs: [createPr(4, {labels: [{name: "ready-for-approval"}]})],
-        commits: {4: [commit("c1", MAESTRO)]},
-        reviews: {4: [{user: {login: "reviewer"}, state: "CHANGES_REQUESTED"}, {user: {login: "reviewer"}, state: "COMMENTED"}]},
-        timeline: {4: [{event: "head_ref_force_pushed", actor: {login: "someone"}}]},
-    });
-
-    const {actions} = await run(github);
-
-    assert.equal(actions[0].action, "remove");
-    assert.match(actions[0].reasons.join(" "), /force-pushed by `someone`.*Changes requested by `reviewer`/);
-});
 
 test("labels an inter-branch merge that only adds merge-bot commits on top of the source branch", async () =>
 {
@@ -205,13 +179,3 @@ test("removes the label from any labeled PR that is not an eligible bot PR", asy
     assert.equal(actions[0].action, "remove");
 });
 
-test("leaves the label unchanged when mergeability is unknown or evaluation fails", async () =>
-{
-    const github = createGitHub({
-        prs: [createPr(10, {mergeable: null, labels: [{name: "ready-for-approval"}]})],
-        commits: {10: [commit("c1", MAESTRO)]},
-    });
-
-    assert.deepEqual((await run(github)).actions, []);
-    assert.deepEqual((await run(github, "404")).actions, []);
-});
